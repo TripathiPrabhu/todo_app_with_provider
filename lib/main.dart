@@ -1,52 +1,63 @@
+import 'dart:js';
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider(
+    create: (context)=>TaskData(),
+      child: MyApp()));
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  @override
-  void setState(VoidCallback fn) {
-    
-    super.setState(fn);
-  }
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.deepOrange,
-        primaryColor: Colors.orange,
-      ),
-      home: Scaffold (
-        appBar: AppBar(
-          title: Text('To-Do App'),
-          centerTitle: true,
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primarySwatch: Colors.deepOrange,
+          primaryColor: Colors.orange,
         ),
-        body: ListView.builder(
-          itemCount: 5,
-            itemBuilder: (context, index){
-              return ListTile(
-                leading: Text('milk'),
-                trailing: Checkbox(
-                  value: false,
-                  onChanged: (bool? value) {
-                    setState(() {
-                                  value = true;
-                    });
-
-                  },
-                ),
-              );
-            }),
-      ),
+        home: Scaffold (
+          appBar: AppBar(
+            title: Text('To-Do App'),
+            centerTitle: true,
+          ),
+          body: ListView.builder(
+            itemCount: context.watch<TaskData>().listTask.length,
+              itemBuilder: (context, index){
+                return ListTile(
+                  leading: Text('${context.watch<TaskData>().listTask[index].product}'),
+                  trailing: Checkbox(
+                    value: context.watch<TaskData>().listTask[index].isAvailble,
+                    onChanged: (bool? value) {
+                      context.read<TaskData>().toggle(index, value!);
+                      },
+                  ),
+                );
+              }),
+        ),
     );
   }
+}
+
+class Task {
+  String? product;
+  bool? isAvailble;
+  Task({this.product, this.isAvailble});
+}
+
+class TaskData extends ChangeNotifier{
+List<Task> listTask = [
+  Task(product: 'Milk', isAvailble: false),
+  Task(product: 'Sugar', isAvailble: false),
+  Task(product: 'Salt', isAvailble: false),
+];
+
+toggle(int index, bool value){
+  listTask[index].isAvailble = value;
+  notifyListeners();
+
+}
 }
